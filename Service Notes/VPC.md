@@ -19,9 +19,9 @@ After completing this lab, you should be proficient in performing the following 
 
 ## 🗺️ Scenario: Customized Network Deployment
 
-In this lab, you will use Amazon VPC to create your own VPC and add essential networking components to produce a customized network topology. You will also create security groups to control traffic to your EC2 instance. 
+In this lab, i will use Amazon VPC to create my own VPC and add essential networking components to produce a customized network topology. I will also create security groups to control traffic to your EC2 instance. 
 
-You will then configure and customize an EC2 instance to run a web server and launch it into the VPC, ensuring the final architecture aligns with the following customer diagram:
+I will then configure and customize an EC2 instance to run a web server and launch it into the VPC, ensuring the final architecture aligns with the following customer diagram:
 
 <img width="1380" height="662" alt="1" src="https://github.com/user-attachments/assets/dbeddbc8-cbef-42ec-b97c-413fdc1bbc30" />
 
