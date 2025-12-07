@@ -1,211 +1,214 @@
-In this lab, I focused on using Amazon Virtual Private Cloud (VPC) to create my own customized, isolated network environment and then deploying an EC2-based web server into it. This exercise was really cool because it simulated building a real network architecture that you'd use for an enterprise customer.
+## My VPC and Web Server Deployment - Service Note
 
-🎯 What I Aimed to Achieve
-My Objectives
-By the end of this lab, I wanted to make sure I could:
+## 📋 Quick Overview
 
-Create my own virtual private cloud (VPC).
-Set up subnets within that VPC.
-Configure a security group (basically the firewall rules).
-Launch an Amazon EC2 instance into my VPC.
+**Lab Date:** 17-11-2025  
+**Lab Type:** VPC Creation and EC2 Web Server Deployment  
+**Focus Area:** AWS Networking Fundamentals  
+**Customer Scenario:** Fortune 100 Enterprise Network Architecture  
+**Completed By:** Brite Sendedza  
+**Status:** Successfully Completed
 
-The Scenario
-In this lab, I used Amazon VPC to build my own VPC from scratch and added extra components to create a customized network for a Fortune 100 customer. I set up security groups for my EC2 instance, configured a web server, and launched it into the VPC I created.
+---
 
-How I Set Everything Up: VPC and Web Server Deployment
-1. 🏗️ Creating My First VPC
-I started by setting up my isolated network environment using the automated workflow, which made things pretty straightforward.
-1.1 Getting to the VPC Dashboard
-First, I opened up the VPC dashboard to kick off the creation process.
-<img width="1060" height="226" alt="2" src="https://github.com/user-attachments/assets/5f80c3b4-e937-4d12-b990-2634775f1d39" />
-1.2 Defining My VPC Network
-I selected the "VPC and more" option because it automatically creates a standard two-tier architecture for me, which saves a lot of time.
-<img width="1861" height="882" alt="3" src="https://github.com/user-attachments/assets/c914135c-b791-44ae-bd05-0c3d349dd53a" />
+## 🎯 What I Set Out to Do
 
-VPC Name: I called mine Lab VPC.
-IPv4 CIDR Block: I set this to 10.0.0.0/16\mathbf{10.0.0.0/16}
-10.0.0.0/16, which gives me a large private IP range to work with.
+I wanted to build a complete, customized network environment from scratch using Amazon VPC and deploy a working web server into it. This lab simulated building real network architecture for an enterprise customer—the kind of stuff you'd actually do in production.
 
-Preview: I could see it would create both Public and Private Subnets along with the associated Route Tables in the us-west-2 region.
+**My Specific Goals:**
+* Create my own Virtual Private Cloud (VPC)
+* Set up public and private subnets within the VPC
+* Configure security groups (firewall rules)
+* Launch an EC2 instance and make it accessible from the internet
 
-1.3 Confirming Everything Got Created
-The Create VPC workflow showed me that all my foundational network resources were successfully provisioned, including:
-<img width="1847" height="830" alt="4" src="https://github.com/user-attachments/assets/4eb74f0c-5ed2-442b-9904-4c9cebf0c5dc" />
+---
 
-My VPC (vpc−0431518c...\mathbf{vpc-0431518c...}
-vpc−0431518c...).
+## The AWS Services I Used
 
-DNS hostnames and resolution were enabled.
-All the Subnets, Route Tables, and the Internet Gateway (IGW) were created and attached.
+### Amazon VPC (Virtual Private Cloud)
+**What It Is:** VPC is your own isolated network space in AWS. Think of it as your private data center in the cloud where you have complete control over IP addressing, subnets, routing, and security.
 
-1.4 Checking Out My Initial Subnets
-Looking at the Subnets dashboard, I could see the four subnets that were automatically created by the workflow.
-<img width="1216" height="638" alt="5" src="https://github.com/user-attachments/assets/07038014-0e60-41eb-acf1-1c65efb9b8c8" />
+**How I Used It:** I created a VPC called Lab VPC with a CIDR block of 10.0.0.0/16, giving me over 65,000 IP addresses to work with. This became the foundation for everything else.
 
-2. 🗺️ Customizing My Subnets and Route Tables
-<img width="1787" height="743" alt="6" src="https://github.com/user-attachments/assets/70c1323e-33a8-4014-b7f9-191dba97e1d5" />
-Next, I customized my network by creating an additional subnet and making sure all my subnets were associated with the correct route tables.
-2.1 Adding Another Subnet
-I created a new subnet called Public Subnet 2 within my existing Lab VPC (10.0.0.0/16\mathbf{10.0.0.0/16}
-10.0.0.0/16).
+### Subnets
+**What They Are:** Subnets divide your VPC into smaller network segments. You can have public subnets (accessible from the internet) and private subnets (isolated from direct internet access).
 
-<img width="1845" height="552" alt="7" src="https://github.com/user-attachments/assets/c6713e80-c637-4257-af5a-752bb5d5e0cf" />
-2.2 Verifying My New Subnet
-The Subnets dashboard confirmed that Public Subnet 2 (subnet−0ada8314...\mathbf{subnet-0ada8314...}
-subnet−0ada8314...) was successfully created and available.
+**How I Used Them:** I created both public and private subnets across different Availability Zones. My web server went into a public subnet so it could be reached from the internet, while backend resources would go in private subnets.
 
-<img width="1850" height="831" alt="8" src="https://github.com/user-attachments/assets/12754752-e87e-4014-bc17-4ba6bbc282f4" />
-2.3 Linking Public Subnets to the Public Route Table
-I configured my Public Route Table (rtb-0009f...) to associate with Public Subnet 2 (10.0.2.0/24\mathbf{10.0.2.0/24}
-10.0.2.0/24), which ensures it has public access through the IGW.
+### Internet Gateway (IGW)
+**What It Is:** The Internet Gateway is the bridge between your VPC and the internet. Without it, nothing in your VPC can communicate with the outside world.
 
-<img width="1855" height="648" alt="9" src="https://github.com/user-attachments/assets/8ec16a2e-ce7e-4aa6-927e-6d7be45d66c3" />
-2.4 Linking Private Subnets to the Private Route Table
-I also configured my Private Route Table (rtb-034fa...) to associate with Private Subnet 2 (10.0.3.0/24\mathbf{10.0.3.0/24}
-10.0.3.0/24), which keeps my backend resources isolated as intended.
+**How I Used It:** The automated VPC creation attached an IGW to my VPC, enabling internet connectivity for resources in public subnets.
 
-<img width="1197" height="548" alt="10" src="https://github.com/user-attachments/assets/16f58be5-0533-4a08-92eb-a36e06dd63c9" />
+### Route Tables
+**What They Are:** Route tables contain rules that determine where network traffic gets directed. They're like the GPS for your network.
 
-3. 🔒 Setting Up Security and Launching My EC2 Instance
-I created a dedicated security group to set up my firewall rules, then deployed my web server instance.
-3.1 Starting the Security Group Creation
-I went to the Security Groups section and clicked on "Create security group".
-<img width="1197" height="548" alt="10" src="https://github.com/user-attachments/assets/d4c2b624-d4ff-4077-aa02-7609a84bdc1c" />
-3.2 Confirming My Security Group Setup
-I successfully created a new Security Group called Web (sg-0f24364f...). Here's what I configured:
-<img width="1218" height="616" alt="11" src="https://github.com/user-attachments/assets/0c7dcac4-7a28-410d-9d2a-d80bf5b478a7" />
+**How I Used Them:** I configured route tables to direct internet-bound traffic (0.0.0.0/0) to the Internet Gateway for public subnets, while keeping private subnet traffic isolated.
 
-Description: "Enable HTTP access."
-Rules: 1 Inbound rule (for HTTP traffic) and 1 Outbound rule.
+### Security Groups
+**What They Are:** Security Groups are virtual firewalls that control inbound and outbound traffic at the instance level. They use allow rules only.
 
-3.3 Launching My Web Server and Checking Its Health
-I launched my Web Server 1 EC2 instance into the public subnet using a t3.micro instance type.
-<img width="1532" height="666" alt="12 2" src="https://github.com/user-attachments/assets/8fc3bd2a-cfbc-46d4-9589-20e8fc44023e" />
+**How I Used Them:** I created a security group called `Web` that allows HTTP traffic (Port 80) so people can access my web server from their browsers.
 
-State: Running.
-Status Check: Everything looked good with 3/3 checks passed.
-IP Addresses: It got assigned a Public IPv4 address (35.91.193.115\mathbf{35.91.193.115}
-35.91.193.115) and a
-Private IPv4 address (10.0.2.9\mathbf{10.0.2.9}
-10.0.2.9).
+### Amazon EC2
+**What It Is:** EC2 provides resizable virtual servers in the cloud. You can configure them however you need.
 
+**How I Used It:** I launched a t3.micro instance running a web server in my public subnet, giving it both public and private IP addresses.
 
+---
 
-4. ✅ Testing My Web Server
-The final step was confirming that my web server was publicly accessible and wrapping up the lab.
-4.1 How I Verified Connectivity
-Here's what I did to verify everything was working:
-<img width="1246" height="767" alt="12" src="https://github.com/user-attachments/assets/f1eeecb9-496b-48a4-8173-a5c90901ff73" />
+## How I Built Everything
 
-I waited until my instance showed 2/2 checks passed.
-I copied the Public IPv4 DNS value.
-I pasted it into my web browser and hit Enter.
+### Step 1: Creating My VPC Foundation
 
-<img width="1241" height="131" alt="13" src="https://github.com/user-attachments/assets/79ff14d8-63eb-467e-8c22-1bf8c8131592" />
-4.2 Lab Successfully Completed
-And that's it! I successfully completed all the objectives for this lab.In this lab, I focused on using Amazon Virtual Private Cloud (VPC) to create my own customized, isolated network environment and then deploying an EC2-based web server into it. This exercise was really cool because it simulated building a real network architecture that you'd use for an enterprise customer.
+**Getting Started:**
+I opened the VPC dashboard and selected "VPC and more" to use the automated workflow. This was a huge time-saver because it creates a standard two-tier architecture automatically.
 
-🎯 What I Aimed to Achieve
-My Objectives
-By the end of this lab, I wanted to make sure I could:
+**Configuring My VPC:**
+* **Name:** Lab VPC
+* **CIDR Block:** 10.0.0.0/16 (plenty of IP addresses!)
+* **Result:** The wizard created my VPC, public and private subnets, route tables, and an Internet Gateway all at once
 
-Create my own virtual private cloud (VPC).
-Set up subnets within that VPC.
-Configure a security group (basically the firewall rules).
-Launch an Amazon EC2 instance into my VPC.
+**Verification:**
+I checked the VPC dashboard and confirmed that:
+* My VPC (vpc-0431518c...) was created
+* DNS hostnames and resolution were enabled
+* All subnets, route tables, and the IGW were properly attached
 
-The Scenario
-In this lab, I used Amazon VPC to build my own VPC from scratch and added extra components to create a customized network for a Fortune 100 customer. I set up security groups for my EC2 instance, configured a web server, and launched it into the VPC I created.
+I could see four subnets were automatically created by the workflow.
 
-How I Set Everything Up: VPC and Web Server Deployment
-1. 🏗️ Creating My First VPC
-I started by setting up my isolated network environment using the automated workflow, which made things pretty straightforward.
-1.1 Getting to the VPC Dashboard
-First, I opened up the VPC dashboard to kick off the creation process.
-<img width="1060" height="226" alt="2" src="https://github.com/user-attachments/assets/5f80c3b4-e937-4d12-b990-2634775f1d39" />
-1.2 Defining My VPC Network
-I selected the "VPC and more" option because it automatically creates a standard two-tier architecture for me, which saves a lot of time.
-<img width="1861" height="882" alt="3" src="https://github.com/user-attachments/assets/c914135c-b791-44ae-bd05-0c3d349dd53a" />
+---
 
-VPC Name: I called mine Lab VPC.
-IPv4 CIDR Block: I set this to 10.0.0.0/16\mathbf{10.0.0.0/16}
-10.0.0.0/16, which gives me a large private IP range to work with.
+### Step 2: Customizing My Network
 
-Preview: I could see it would create both Public and Private Subnets along with the associated Route Tables in the us-west-2 region.
+**Adding Another Public Subnet:**
+I wanted an additional public subnet, so I created Public Subnet 2 within my Lab VPC. This gives me more flexibility for distributing resources.
 
-1.3 Confirming Everything Got Created
-The Create VPC workflow showed me that all my foundational network resources were successfully provisioned, including:
-<img width="1847" height="830" alt="4" src="https://github.com/user-attachments/assets/4eb74f0c-5ed2-442b-9904-4c9cebf0c5dc" />
+**Verifying the Subnet:**
+The dashboard confirmed my new subnet (subnet-0ada8314...) was successfully created and available.
 
-My VPC (vpc−0431518c...\mathbf{vpc-0431518c...}
-vpc−0431518c...).
+**Associating with Route Tables:**
+This was important—I had to make sure each subnet was associated with the correct route table:
+* **Public Subnets:** Associated with the Public Route Table (rtb-0009f...), which routes internet traffic to the IGW
+* **Private Subnets:** Associated with the Private Route Table (rtb-034fa...), which keeps backend resources isolated
 
-DNS hostnames and resolution were enabled.
-All the Subnets, Route Tables, and the Internet Gateway (IGW) were created and attached.
+---
 
-1.4 Checking Out My Initial Subnets
-Looking at the Subnets dashboard, I could see the four subnets that were automatically created by the workflow.
-<img width="1216" height="638" alt="5" src="https://github.com/user-attachments/assets/07038014-0e60-41eb-acf1-1c65efb9b8c8" />
+### Step 3: Setting Up Security and Launching My Web Server
 
-2. 🗺️ Customizing My Subnets and Route Tables
-<img width="1787" height="743" alt="6" src="https://github.com/user-attachments/assets/70c1323e-33a8-4014-b7f9-191dba97e1d5" />
-Next, I customized my network by creating an additional subnet and making sure all my subnets were associated with the correct route tables.
-2.1 Adding Another Subnet
-I created a new subnet called Public Subnet 2 within my existing Lab VPC (10.0.0.0/16\mathbf{10.0.0.0/16}
-10.0.0.0/16).
+**Creating the Security Group:**
+I went to the Security Groups section and created a new group called Web (sg-0f24364f...).
 
-<img width="1845" height="552" alt="7" src="https://github.com/user-attachments/assets/c6713e80-c637-4257-af5a-752bb5d5e0cf" />
-2.2 Verifying My New Subnet
-The Subnets dashboard confirmed that Public Subnet 2 (subnet−0ada8314...\mathbf{subnet-0ada8314...}
-subnet−0ada8314...) was successfully created and available.
+**Configuration:**
+* **Description:** "Enable HTTP access"
+* **Inbound Rules:** 1 rule allowing HTTP traffic (Port 80)
+* **Outbound Rules:** 1 default rule allowing all outbound traffic
 
-<img width="1850" height="831" alt="8" src="https://github.com/user-attachments/assets/12754752-e87e-4014-bc17-4ba6bbc282f4" />
-2.3 Linking Public Subnets to the Public Route Table
-I configured my Public Route Table (rtb-0009f...) to associate with Public Subnet 2 (10.0.2.0/24\mathbf{10.0.2.0/24}
-10.0.2.0/24), which ensures it has public access through the IGW.
+**Launching My EC2 Instance:**
+I launched an EC2 instance called Web Server 1 using a t3.micro instance type (perfect for testing) and placed it in my public subnet.
 
-<img width="1855" height="648" alt="9" src="https://github.com/user-attachments/assets/8ec16a2e-ce7e-4aa6-927e-6d7be45d66c3" />
-2.4 Linking Private Subnets to the Private Route Table
-I also configured my Private Route Table (rtb-034fa...) to associate with Private Subnet 2 (10.0.3.0/24\mathbf{10.0.3.0/24}
-10.0.3.0/24), which keeps my backend resources isolated as intended.
+**Instance Details:**
+* **State:** Running
+* **Status Checks:** 3/3 passed
+* **Public IPv4:** 35.91.193.115
+* **Private IPv4:** 10.0.2.9
 
-<img width="1197" height="548" alt="10" src="https://github.com/user-attachments/assets/16f58be5-0533-4a08-92eb-a36e06dd63c9" />
+---
 
-3. 🔒 Setting Up Security and Launching My EC2 Instance
-I created a dedicated security group to set up my firewall rules, then deployed my web server instance.
-3.1 Starting the Security Group Creation
-I went to the Security Groups section and clicked on "Create security group".
-<img width="1197" height="548" alt="10" src="https://github.com/user-attachments/assets/d4c2b624-d4ff-4077-aa02-7609a84bdc1c" />
-3.2 Confirming My Security Group Setup
-I successfully created a new Security Group called Web (sg-0f24364f...). Here's what I configured:
-<img width="1218" height="616" alt="11" src="https://github.com/user-attachments/assets/0c7dcac4-7a28-410d-9d2a-d80bf5b478a7" />
+### Step 4: Testing and Validation
 
-Description: "Enable HTTP access."
-Rules: 1 Inbound rule (for HTTP traffic) and 1 Outbound rule.
+**Verifying Connectivity:**
+This was the moment of truth! I:
+1. Waited for the instance to show 2/2 checks passed
+2. Copied the Public IPv4 DNS value
+3. Pasted it into my web browser and hit Enter
 
-3.3 Launching My Web Server and Checking Its Health
-I launched my Web Server 1 EC2 instance into the public subnet using a t3.micro instance type.
-<img width="1532" height="666" alt="12 2" src="https://github.com/user-attachments/assets/8fc3bd2a-cfbc-46d4-9589-20e8fc44023e" />
+**Result:** Success! My web server was accessible from the internet. The page loaded perfectly, confirming that my entire network configuration—VPC, subnets, route tables, IGW, security groups, and EC2 instance—was working together flawlessly.
 
-State: Running.
-Status Check: Everything looked good with 3/3 checks passed.
-IP Addresses: It got assigned a Public IPv4 address (35.91.193.115\mathbf{35.91.193.115}
-35.91.193.115) and a
-Private IPv4 address (10.0.2.9\mathbf{10.0.2.9}
-10.0.2.9).
+---
 
+## Challenge I Faced
 
+### Seeing Myself Actually Excel at This
 
-4. ✅ Testing My Web Server
-The final step was confirming that my web server was publicly accessible and wrapping up the lab.
-4.1 How I Verified Connectivity
-Here's what I did to verify everything was working:
-<img width="1246" height="767" alt="12" src="https://github.com/user-attachments/assets/f1eeecb9-496b-48a4-8173-a5c90901ff73" />
+**What Happened:** My main challenge wasn't technical—it was personal. I've always had this hunger to learn how to properly create VPCs and all their resources, but I wasn't sure if I could actually do it well. Watching myself successfully configure everything—the VPC, subnets, route tables, security groups, and getting that web server running—was honestly a bit surreal.
 
-I waited until my instance showed 2/2 checks passed.
-I copied the Public IPv4 DNS value.
-I pasted it into my web browser and hit Enter.
+**Why This Mattered:** For so long, VPC networking felt like this intimidating, complex topic that "real" cloud engineers did. Actually doing it myself and seeing it work was a confidence breakthrough.
 
-<img width="1241" height="131" alt="13" src="https://github.com/user-attachments/assets/79ff14d8-63eb-467e-8c22-1bf8c8131592" />
-4.2 Lab Successfully Completed
-And that's it! I successfully completed all the objectives for this lab.
+---
+
+## My Experience and Key Takeaways
+
+**The Experience:**
+* **Empowerment:** There's something incredible about creating an entire network from scratch and watching it come to life. When that web page loaded in my browser, I realized I had built the entire path that request took—from the internet, through the IGW, into my VPC, past my security group, to my EC2 instance.
+
+* **Understanding Through Doing:** Reading about VPCs is one thing; actually creating subnets, configuring route tables, and associating them correctly gave me a deep, practical understanding I never had before.
+
+* **The "Aha!" Moment:** It all clicked when I saw how each piece connects. The VPC is the container, subnets segment the space, route tables direct traffic, the IGW provides internet access, security groups control what gets through, and EC2 instances run your applications. It's like building with LEGO blocks—each piece has a purpose.
+
+**Key Takeaways:**
+* **VPC Automation is Powerful:** Using "VPC and more" saved me tons of time by automating the creation of common network components. But understanding what it creates is crucial.
+
+* **Route Tables are Everything:** If your route tables aren't configured correctly, traffic goes nowhere. The route to 0.0.0.0/0 → IGW is what makes a subnet "public."
+
+* **Security Groups are Your Friend:** They're stateful (return traffic is automatically allowed) and work at the instance level. Understanding this made security configuration so much easier.
+
+* **Public vs. Private Matters:** Public subnets need routes to the IGW and resources need public IPs. Private subnets don't route to the IGW, keeping resources isolated. This architectural pattern is fundamental to AWS.
+
+* **I Can Actually Do This:** The biggest takeaway? I have the skills to design and build real network architectures. That hunger to learn wasn't just wishful thinking—I proved to myself that I can excel at this.
+
+---
+
+## What I Accomplished
+
+| Component | What I Built | Status |
+| :--- | :--- | :--- |
+| VPC | Created Lab VPC with 10.0.0.0/16 CIDR | Complete |
+| Subnets | Public and private subnets across AZs | Complete |
+| Route Tables | Configured public and private routing | Complete |
+| Internet Gateway | Attached IGW for internet connectivity | Complete |
+| Security Group | Created Web SG with HTTP access | Complete |
+| EC2 Instance | Launched Web Server 1 (t3.micro) | Complete |
+| Connectivity Test | Successfully accessed web server via browser | Complete |
+
+**Key Achievement:** Built a complete, production-ready network architecture from scratch and deployed a functioning web server accessible from the internet.
+
+---
+
+## 🎓 What This Taught Me
+
+### Confidence in Cloud Architecture
+I came into this lab eager but uncertain. I left it knowing I can design and implement real AWS network architectures. That's huge for my career growth.
+
+### The Importance of Fundamentals
+Understanding how VPCs, subnets, routing, and security work together is foundational for everything else in AWS. You can't build complex architectures without these basics.
+
+### Hands-On Learning Works
+No amount of reading could have given me the confidence that actually doing this work provided. Getting my hands dirty and troubleshooting along the way cemented the knowledge.
+
+### Enterprise-Ready Skills
+This lab simulated building network infrastructure for a Fortune 100 customer. I now have practical experience with the same patterns and architectures used in real enterprise environments.
+
+---
+
+## What I'd Do Next
+
+* **Multi-Tier Architecture:** Build a full three-tier architecture with web, application, and database layers
+* **NAT Gateway Implementation:** Set up NAT Gateways so private subnet resources can access the internet securely
+* **VPC Peering:** Connect multiple VPCs together for more complex network topologies
+* **Network ACLs:** Add another layer of security at the subnet level
+* **VPC Flow Logs:** Implement logging to monitor and troubleshoot network traffic
+
+---
+
+## ✍️ Final Thoughts
+
+**Lab Status:** Successfully completed  
+**Confidence Level:** High—I can now build VPC architectures independently  
+**Personal Growth:** Proved to myself I can excel at cloud networking  
+**Would I Recommend This?** Absolutely! Essential for anyone serious about AWS
+
+**My Closing Notes:** This lab was transformational for me. I didn't just learn how to create a VPC—I proved to myself that I can design and implement real network architectures. That hunger to learn VPC networking has been satisfied, but it's been replaced with excitement to tackle even more complex networking challenges. Seeing my web server accessible from the internet, knowing I built every piece of the network it runs on, was genuinely empowering. I'm ready to apply these skills to real-world projects and continue growing as a cloud engineer.
+
+**Completed On:** 17-11-2025  
+**By:** Brite Sendedza
