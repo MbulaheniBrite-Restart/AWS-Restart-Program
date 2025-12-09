@@ -156,18 +156,6 @@ Honestly, this hands-on trial-and-error approach is what really made it stick. N
 
 ---
 
-## What's Next
-
-So now that I've got this working, here's what I'm thinking for next steps:
-- Maybe enable Multi-AZ if this goes to production - can't have a single point of failure
-- Set up automated backups and snapshots on a regular schedule
-- Get CloudWatch monitoring going so I can actually see what's happening performance-wise
-- Start building out more tables and set up foreign key relationships
-- Play around with composite primary keys in some more complex table designs
-- Write up proper documentation for the team about connection strings and access patterns
-
----
-
 ## Quick Reference
 
 - **Database Endpoint (Writer):** You can find this in RDS Console under Connectivity & Security
