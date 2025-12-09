@@ -83,7 +83,7 @@ The moment of truth! I tried the same malware site connection again. And guess w
 
 ## How I Fixed It
 
-### I Hit the Books (Well, the Internet)
+### I Did Some Research
 **What I Did:** I decided to actually learn about Suricata instead of just winging it. I found this really helpful documentation on the official Suricata website: https://docs.suricata.io/en/latest/rules/intro.html
 
 I spent some time reading through it, and honestly, it was worth it.
