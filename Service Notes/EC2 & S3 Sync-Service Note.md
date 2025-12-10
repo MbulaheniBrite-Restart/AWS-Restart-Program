@@ -1,180 +1,184 @@
 # AWS Service Note: EBS Snapshots & S3 Sync Implementation
 
 **Date:** 04-10-2025  
-**Created by:**  Brite Sendedza  
+**Created by:** Brite Sendedza  
 **Environment:** AWS US West (Oregon) - us-west-2
 
 ---
 
 ## Overview
 
-This service note documents my implementation of an automated backup and file synchronization solution using AWS EC2, EBS snapshots, and S3. The goal was to create a reliable data protection strategy that combines volume-level snapshots with object-level file versioning.
+So I just wrapped up setting up an automated backup and file sync solution using AWS. The whole idea was to build a solid data protection strategy that covers both volume-level snapshots (with EBS) and file-level versioning (with S3). Pretty cool stuff, honestly.
 
 ---
 
-## AWS Services Used
+## AWS Services I Got My Hands On
 
 ### Amazon EC2 (Elastic Compute Cloud)
-EC2 is basically AWS's virtual server service. I worked with two instances in this lab:
-- **Command Host (t3.medium):** This was my main workstation where I ran all the CLI commands and scripts
-- **Processor (t3.micro):** The instance I was backing up, attached to the EBS volume I needed to snapshot
+EC2 is basically where you get your virtual servers on AWS. I had two instances running for this lab:
+- **Command Host (t3.medium):** This was my main workstation where I ran all the CLI commands and wrote my scripts
+- **Processor (t3.micro):** The instance I was actually backing up—this one had the EBS volume I needed to snapshot
 
-EC2 gave me the flexibility to stop instances for consistent snapshots and attach IAM roles for secure service access.
+What I really liked about EC2 here is that I could stop instances when I needed consistent snapshots, and I could attach IAM roles directly to them for secure access to other AWS services.
 
 ### Amazon EBS (Elastic Block Store)
-EBS provides the persistent storage volumes attached to my EC2 instances. Think of it like a hard drive for your virtual machines. The cool thing about EBS is that I could create point-in-time snapshots without losing data, which is perfect for backup and disaster recovery scenarios.
+Think of EBS as the hard drives for your virtual machines. These volumes stick around even if you stop or restart your instances, which is exactly what you want. The best part? I could take point-in-time snapshots without losing any data, which is perfect for backups and disaster recovery.
 
-**Key volume:** vol-066c04b96bf8bb138 (attached to my Processor instance)
+**The volume I worked with:** vol-066c04b96bf8bb138 (attached to my Processor instance)
 
 ### Amazon S3 (Simple Storage Service)
-S3 is AWS's object storage service - incredibly scalable and durable. I used it to store my synced files with versioning enabled, which meant I could recover deleted files or previous versions whenever needed.
+S3 is AWS's object storage—super scalable and crazy durable. I used it to store my synced files with versioning turned on, which means I can go back and grab old versions of files or even recover deleted ones. It's like having a time machine for your files.
 
-**Bucket created:** s3-brite-bucket (General Purpose, multi-AZ)
+**My bucket:** s3-brite-bucket (set up as General Purpose with multi-AZ for redundancy)
 
 ### IAM (Identity and Access Management)
-IAM is how I managed permissions securely. Instead of hardcoding credentials, I created a role called "S3BucketAccess" and attached it to my EC2 instance. This way, my instance could talk to S3 without me having to manage access keys.
+IAM is how I kept things secure without making life difficult. Instead of dealing with access keys and secrets, I just created a role called "S3BucketAccess" and slapped it on my EC2 instance. Now my instance can talk to S3 without me having to worry about managing credentials.
 
 ### AWS CLI & Boto3
-- **AWS CLI:** The command-line tool I used for everything from creating snapshots to syncing files
-- **Boto3:** AWS's Python SDK that let me write automation scripts to handle snapshot creation and cleanup
+- **AWS CLI:** The command-line tool I used for pretty much everything—creating snapshots, syncing files, you name it
+- **Boto3:** AWS's Python SDK that let me write scripts to automate the snapshot creation and cleanup process
 
 ---
 
-## Implementation Steps
+## What I Actually Did
 
-### 1. Initial Setup
-I started by setting up my S3 bucket in the us-west-2 region and making sure my EC2 instances were ready to go. Both instances were running and passed their status checks.
+### 1. Getting Everything Set Up
+First thing I did was create my S3 bucket in us-west-2 and make sure both my EC2 instances were up and running. Everything passed status checks, so I was good to go.
 
-### 2. IAM Role Configuration
-Attached the S3BucketAccess IAM role to my Processor instance so it could interact with S3 securely. This follows AWS best practices by using instance roles instead of embedding credentials.
+### 2. IAM Role Setup
+I attached the S3BucketAccess IAM role to my Processor instance. This is way better than hardcoding credentials—follows AWS best practices and keeps things secure.
 
-### 3. Manual Snapshot Creation
-I connected to my Command Host using EC2 Instance Connect (browser-based SSH - super convenient) and ran through the manual snapshot process:
-- Identified my volume and instance IDs
-- Stopped the Processor instance for a consistent snapshot
+### 3. Creating Snapshots Manually (First Time)
+I connected to my Command Host using EC2 Instance Connect (which is just SSH through your browser—super convenient) and went through the whole snapshot process manually:
+- Found my volume ID and instance ID
+- Stopped the Processor instance to get a clean snapshot
 - Created the snapshot using AWS CLI
-- Waited for completion
-- Restarted the instance
+- Waited for it to finish
+- Started the instance back up
 
-### 4. Snapshot Automation
-Set up a cron job to automate the snapshot process. While the lab had me run it every minute for testing, in production I'd definitely space this out more (maybe daily or weekly depending on requirements).
+### 4. Automating the Snapshots
+Set up a cron job to handle snapshots automatically. The lab had me running it every minute for testing (which is pretty aggressive), but in real life, I'd probably do daily or weekly backups depending on how critical the data is.
 
-### 5. Python Script for Snapshot Management
-Wrote a Python script (snapshooter_v2.py) using boto3 that:
+### 5. Python Script for Managing Snapshots
+Wrote a Python script called snapshooter_v2.py using boto3 that does three things:
 - Creates snapshots for all attached volumes
-- Lists existing snapshots sorted by creation time
-- Automatically deletes old snapshots, keeping only the 2 most recent ones (retention policy)
+- Lists existing snapshots sorted by when they were created
+- Automatically deletes old snapshots, keeping only the 2 most recent (my retention policy)
 
-This prevents snapshot sprawl and keeps costs under control.
+This keeps snapshot costs from spiraling out of control, which is important.
 
-### 6. S3 File Synchronization
-Moved on to syncing files between my EC2 instance and S3:
-- Uploaded initial files (file1.txt, file2.txt, file3.txt)
-- Used aws s3 sync with the --delete flag to mirror the local directory
-- Enabled S3 versioning to track file changes and deletions
+### 6. Syncing Files to S3
+Next up was getting files from my EC2 instance into S3:
+- Uploaded some test files (file1.txt, file2.txt, file3.txt)
+- Used aws s3 sync with the --delete flag to mirror what's on my instance
+- Turned on S3 versioning so I could track changes and deletions
 
-### 7. Testing Version Recovery
-Tested S3's versioning feature by deleting a file locally, syncing to S3, and then viewing the version history. I could see both the previous version and the delete marker, which means recovery would be straightforward if needed.
-
----
-
-## Challenges Faced
-
-- **Snapshot timing consistency:** Initially wasn't sure if I needed to stop the instance for snapshots. Learned that stopping ensures data consistency, especially for databases or active workloads.
-
-- **Understanding sync --delete behavior:** The first time I ran sync with --delete, I was surprised when file1.txt disappeared from S3. Realized it was because that file wasn't in the directory I was syncing from.
-
-- **Cron job logging:** Had to figure out proper logging for my cron job since cron runs silently. Added output redirection to /tmp/cronlog so I could troubleshoot if something went wrong.
-
-- **Snapshot retention logic:** Writing the Python script to properly sort and prune old snapshots took some trial and error. Had to make sure I was sorting by start_time correctly before deleting.
+### 7. Testing the Version Recovery
+I tested S3's versioning by deleting a file locally, syncing to S3, and then checking the version history. Sure enough, I could see both the old version and the delete marker. So if I ever accidentally delete something, I can get it back.
 
 ---
 
-## Solutions Implemented
+## Challenges I Ran Into
 
-- **Consistent snapshots:** Always stop the instance before creating snapshots for critical workloads. For less critical systems, could use application-consistent snapshots or just accept the small risk.
+- **Figuring out snapshot timing:** At first, I wasn't sure if I really needed to stop the instance for snapshots. Turns out, stopping it ensures everything's consistent, especially if you're running databases or active applications.
 
-- **Clear directory structure:** Organized my files properly and documented which directories sync to S3. Now I always double-check with ls before running sync --delete.
+- **The --delete flag surprised me:** First time I ran sync with --delete, file1.txt vanished from S3. I panicked for a second, then realized it was because that file wasn't in the directory I was syncing from. Lesson learned.
 
-- **Robust logging:** Added proper logging to both cron jobs and Python scripts with timestamps. Makes debugging so much easier.
+- **Getting cron to log properly:** Cron jobs run silently, which makes troubleshooting a pain. I had to add output redirection to /tmp/cronlog so I could actually see what was happening.
 
-- **Tested retention policy:** Ran my Python script multiple times to verify it only kept the specified number of snapshots (MAX_SNAPSHOTS = 2). Also added safeguards so it never deletes ALL snapshots accidentally.
+- **Snapshot retention logic:** Writing the Python script to sort and delete old snapshots correctly took some trial and error. Had to make sure I was sorting by start_time properly before deleting anything.
 
 ---
 
-## Best Practices Applied
+## How I Fixed Things
 
-### Security
-- Used IAM roles instead of access keys
-- Applied principle of least privilege (S3BucketAccess only gives necessary S3 permissions)
-- Connected to instances using EC2 Instance Connect (no SSH keys to manage)
+- **Consistent snapshots:** Now I always stop the instance before creating snapshots for important workloads. For less critical stuff, I might skip it and just accept the tiny risk.
 
-### Cost Optimization
-- Implemented snapshot retention policy to avoid unnecessary storage costs
-- Used appropriate instance types (t3.micro for the workload being backed up)
-- Only kept the most recent snapshots needed for recovery
+- **Better directory management:** I organized my files properly and now I always double-check with ls before running sync --delete`. Can't be too careful.
 
-### Reliability
-- Stopped instances before snapshots to ensure data consistency
-- Enabled S3 versioning for file-level recovery
-- Automated the entire process to eliminate human error
+- **Proper logging everywhere:** Added logging to both my cron jobs and Python scripts with timestamps. Makes debugging way easier when something goes wrong.
+
+- **Tested the retention policy:** Ran my Python script multiple times to make sure it only kept the right number of snapshots (MAX_SNAPSHOTS = 2). Also added checks so it never accidentally deletes ALL snapshots.
+
+---
+
+## Best Practices I Followed
+
+### Security Stuff
+- Used IAM roles instead of access keys (way more secure)
+- Followed least privilege—S3BucketAccess only has the S3 permissions it needs
+- Connected using EC2 Instance Connect (no SSH keys to manage or lose)
+
+### Keeping Costs Down
+- Set up snapshot retention to avoid paying for old snapshots I don't need
+- Used the right instance sizes (t3.micro is perfect for the workload)
+- Only keep the most recent snapshots that I actually need for recovery
+
+### Making Things Reliable
+- Stopped instances before snapshots to keep data consistent
+- Enabled S3 versioning so I can recover individual files
+- Automated everything to eliminate human error (because let's be real, I'd forget)
 
 ### Operational Excellence
 - Automated snapshot creation with cron
-- Built self-managing cleanup scripts in Python
-- Added logging for troubleshooting and audit trails
-- Tested recovery procedures (S3 version listing)
+- Built scripts that clean up after themselves
+- Added logging for troubleshooting and keeping audit trails
+- Actually tested the recovery process (because backups are worthless if you can't restore)
 
 ---
 
-## Key Takeaways
+## What I Learned
 
-**What worked really well:**
-- The combination of EBS snapshots (volume-level) and S3 sync (file-level) gives me flexibility in recovery options
-- Python + boto3 made automation straightforward and maintainable
-- IAM roles simplified security without compromising access
+**Things that worked great:**
+- Combining EBS snapshots (for whole volumes) with S3 sync (for individual files) gives me flexibility in how I recover data
+- Python + boto3 made the automation pretty straightforward
+- IAM roles made security easy without making things complicated
 
-**What I'd do differently next time:**
-- Set up SNS notifications for snapshot completion/failures
-- Add more error handling in my Python script
-- Consider using AWS Backup service for more complex scenarios
-- Implement lifecycle policies on S3 to transition old versions to cheaper storage tiers
+**What I'd do differently:**
+- Set up SNS notifications so I know when snapshots succeed or fail
+- Add more error handling to my Python script (right now it's pretty basic)
+- Look into AWS Backup for more complex scenarios—it might simplify things
+- Set up lifecycle policies on S3 to move old versions to cheaper storage
 
-**Production considerations:**
-- Snapshot frequency should match RPO (Recovery Point Objective) requirements
-- Test restores regularly - backups are only good if you can actually recover from them
-- Monitor snapshot costs as they accumulate over time
-- Consider cross-region snapshot copies for disaster recovery
+**If I was doing this in production:**
+- Snapshot frequency should match how much data loss you can tolerate (RPO)
+- Actually test restores regularly—backups only matter if you can recover from them
+- Keep an eye on snapshot costs as they add up over time
+- Consider copying snapshots to another region for disaster recovery
 
 ---
 
-## Commands Reference
+## Commands I Used (Quick Reference)
 
-**Create snapshot manually:**
-
+**Creating snapshots manually:**
+```bash
 aws ec2 create-snapshot --volume-id vol-066c04b96bf8bb138 --description "Manual snapshot"
 aws ec2 wait snapshot-completed --snapshot-ids snap-xxxxx
+```
 
-**Sync to S3:**
+**Syncing to S3:**
 
 aws s3 sync /local/directory s3://s3-brite-bucket/files/
 aws s3 sync /local/directory s3://s3-brite-bucket/files/ --delete
 
-**List S3 versions:**
+
+**Listing S3 versions:**
 
 aws s3api list-object-versions --bucket s3-brite-bucket --prefix files/
 
-**Describe snapshots:**
+
+**Checking snapshots:**
 
 aws ec2 describe-snapshots --owner-ids self --filters "Name=volume-id,Values=vol-066c04b96bf8bb138"
 
+
 ---
 
-## Conclusion
+## Wrapping Up
 
-This lab gave me hands-on experience with core AWS backup and data protection services. I now have a solid understanding of how to implement automated snapshot management and file synchronization that could easily scale to production environments. The key is combining the right tools (EBS snapshots for volumes, S3 for files) with proper automation and retention policies.
+This lab gave me some solid hands-on time with AWS backup and data protection services. I feel pretty confident now about implementing automated snapshot management and file synchronization that could actually work in production. The key is using the right tool for the job (EBS snapshots for volumes, S3 for files) and automating it properly with good retention policies.
 
-**Status:** Implementation Complete  
-**Next Steps:** Apply these patterns to production workloads, set up monitoring and alerting, document recovery procedures
+**Status:** All Done 
+**What's Next:** Apply these patterns to real workloads, set up monitoring and alerts, write up recovery procedures
 
 ---
