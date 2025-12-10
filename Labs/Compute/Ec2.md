@@ -1,7 +1,7 @@
 🛡️ My AWS EC2 Instance Management Guide: Deploying a Web Server
 In this document, I'm walking through how I launched, managed, and secured an Amazon EC2 web server instance. I'll cover everything from its lifecycle to termination protection and resizing.
 
-<img width="1726" height="651" alt="1" src="https://github.com/user-attachments/assets/10553e6b-8353-48b5-aa4b-eff033f619e9" />
+<img width="1726" height="651" alt="1" src="https://github.com/user-attachments/assets/10553e6b-8353-48b5-aa4b-eff033f619e9"/>
 1. 🌐 Getting to the EC2 Dashboard
 First thing I did was navigate to the AWS Management Console and made sure I was in the right region (I used US West - Oregon for this).
 
@@ -9,12 +9,12 @@ What I did: I found the EC2 service either in the "Recently visited" section or 
 Why this matters: The EC2 Dashboard is basically my central hub for launching instances, configuring security groups, and managing storage volumes.
 
 
-<img width="1831" height="700" alt="2" src="https://github.com/user-attachments/assets/d644c9de-7bb5-4467-b711-aa4eb5f41d28" />
+<img width="1831" height="700" alt="2" src="https://github.com/user-attachments/assets/d644c9de-7bb5-4467-b711-aa4eb5f41d28"/>
 2. 🖥️ Naming My Instance and Choosing the OS
 I started the "Launch instances" wizard to set up my instance's identity and pick the operating system.
 What I ConfiguredWhat I ChoseWhy I Chose ItName and TagsWeb ServerI gave it a descriptive name so I could easily identify it later.Application and OS ImageAmazon Linux 2023 AMIThis gives me a stable, secure, and high-performance environment to work with.
 
-<img width="1848" height="762" alt="3" src="https://github.com/user-attachments/assets/e68ab0f3-cbc3-4410-b591-fcb882c67d94" />
+<img width="1848" height="762" alt="3" src="https://github.com/user-attachments/assets/e68ab0f3-cbc3-4410-b591-fcb882c67d94"/>
 3. 🔒 Setting Up Network and Security Groups
 This part was really important because I needed to define my firewall rules and how my instance would communicate with the internet.
 
