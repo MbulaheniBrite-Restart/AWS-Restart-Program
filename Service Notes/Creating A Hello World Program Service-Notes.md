@@ -1,0 +1,185 @@
+# Service Note: AWS Cloud9 Python Development Environment
+
+**Date:** 12-December-2025
+**Author:** Brite Sendedeza 
+**Service:** AWS Cloud9 IDE  
+**Environment:** `reStart-python-cloud9` (EC2-backed)  
+ 
+---
+
+## Executive Summary
+
+This service note documents my experience setting up and working with AWS Cloud9 for Python development. I'm putting this together to help track common issues I ran into and how I solved them. Honestly, this will be super useful for anyone on the team who's getting started with Cloud9 or needs a quick reference guide.
+
+---
+
+## Environment Details
+
+### Cloud9 Configuration
+- **Environment Name:** `reStart-python-cloud9`
+- **Instance Type:** EC2-backed environment
+- **Connection Method:** SSH (Secure Shell)
+- **Access Level:** Owner permissions
+- **Working Directory:** `/home/ec2-user/environment`
+
+### Python Versions Available
+- **Python 2:** 2.7.18 (legacy)
+- **Python 3:** 3.8.20 (primary)
+- **Default:** Python 3.8.20
+
+---
+
+## AWS Tools & Services Used
+
+Let me break down the AWS tools I've been working with and what they actually do:
+
+### AWS Cloud9 IDE
+So Cloud9 is basically a cloud-based integrated development environment (IDE) that runs in my browser. What I really love about it:
+- **Session Persistence:** When I close my browser and come back later, everything's exactly where I left it — my open files, terminal sessions, even my cursor position!
+- **Integrated Terminal:** I get a full bash terminal right in the IDE, no need to SSH separately
+- **Collaborative Features:** I can actually share my environment with teammates for pair programming
+- **Built-in AWS Integration:** It already knows about my AWS credentials and services
+
+### AWS Toolkit for Cloud9
+This is like a supercharged extension that makes working with AWS services way easier:
+- **Lambda Functions:** I can create, test, and deploy Lambda functions right from the IDE
+- **CloudFormation:** Template editing with syntax highlighting and validation
+- **API Gateway:** Testing and debugging API endpoints without leaving Cloud9
+- **SAM (Serverless Application Model):** Building and deploying serverless apps is so much simpler
+
+### EC2 Integration
+My Cloud9 environment runs on an EC2 instance, which means:
+- I get actual compute resources (CPU, memory, storage)
+- I can install packages and dependencies just like a regular Linux machine
+- It automatically manages the instance lifecycle for me
+- Cost-effective because it stops when I'm not using it
+
+---
+
+## Service Activities Performed
+
+Here's what I actually did during this session:
+
+1. **Environment Access**
+   - Logged into AWS Cloud9 console
+   - Located my `reStart-python-cloud9` environment
+   - Verified SSH connectivity and owner permissions
+   - Launched the IDE successfully
+
+2. **Workspace Verification**
+   - Confirmed session restoration was working properly
+   - Reviewed project structure in `reStart-python-clc` folder
+   - Checked file explorer for `.c9` config and `README.md`
+
+3. **Python Environment Validation**
+   - Ran `pwd` to verify working directory location
+   - Tested multiple Python version commands (`python`, `python2`, `python3`)
+   - Documented available Python interpreters
+
+4. **Script Execution Testing**
+   - Attempted basic Python commands in bash (this didn't go well!)
+   - Identified shell vs. Python interpreter confusion
+   - Successfully executed `sample.py` with command-line arguments
+
+---
+
+## Challenges Encountered
+
+Let me be real about what tripped me up:
+
+- **Shell Context Confusion:** I tried running `print("Hello, world")` directly in the bash terminal thinking it would just work — it didn't! Got a syntax error because bash doesn't understand Python syntax.
+
+- **Python Version Ambiguity:** Having multiple Python versions available (`python`, `python2`, `python3`) made it confusing at first to know which one to use.
+
+- **Command Execution Context:** I wasn't always clear about whether I was in a bash shell or Python REPL, which led to running commands in the wrong environment.
+
+- **Argument Passing Syntax:** Initially wasn't sure about the proper syntax for passing command-line arguments to Python scripts in the Cloud9 terminal.
+
+---
+
+## Solutions Implemented
+
+Here's how I fixed everything:
+
+- **Shell vs. Python Clarity:** I learned to always check my prompt — `$` means bash, `>>>` means Python REPL. Now I make sure I'm in the right environment before running code.
+
+- **Standardized Python Command:** I decided to always use `python3` explicitly instead of just `python` to avoid any version ambiguity. It's clearer and more predictable.
+
+- **Proper Script Execution:** For running Python files, I now consistently use the format: `python3 script_name.py arg1 arg2`. This keeps things simple and error-free.
+
+- **REPL for Quick Tests:** When I just want to test a quick one-liner, I start the Python REPL first with `python3`, then run my commands. When I'm done, I use `exit()` to get back to bash.
+
+- **Documentation of Workflow:** I created this guide (meta, right?) so I don't forget these lessons and can share them with others!
+
+---
+
+## Key Learnings & Best Practices
+
+Things I'll definitely remember going forward:
+
+### Environment Management
+- Always verify your working directory with `pwd` before running scripts
+- Use `python3 --version` to confirm you're using the right Python version
+- Keep your project files organized in the file explorer
+
+### Command Execution
+- **For one-off commands:** Use the Python REPL (`python3` then your commands)
+- **For scripts:** Use `python3 script.py` from the bash terminal
+- **Never** try to run Python syntax directly in bash (learned this the hard way!)
+
+### AWS Cloud9 Features
+- Take advantage of the session restore feature — it's honestly a lifesaver
+- Use the AWS Toolkit for serverless development work
+- Keep the terminal visible at the bottom for quick command access
+
+### Troubleshooting Tips
+- If you get a syntax error, check which shell you're in first
+- Use explicit Python version commands (`python3` not `python`)
+- Read error messages carefully — they usually tell you exactly what's wrong
+
+---
+
+## Outcomes & Results
+
+**What I Achieved:**
+- Successfully configured and accessed AWS Cloud9 environment
+- Verified Python installation and version compatibility
+- Established a reliable workflow for script execution
+- Documented common pitfalls and solutions for future reference
+- Gained confidence working with Cloud9 IDE features
+
+**Skills Developed:**
+- Understanding AWS Cloud9 environment management
+- Differentiating between shell contexts (bash vs. Python)
+- Using AWS Toolkit for cloud development
+- Troubleshooting Python execution issues
+- Documenting technical workflows
+
+---
+
+## Recommendations for Future Work
+
+Based on my experience, here's what I think would be helpful:
+
+1. **Environment Customization:**
+   - Consider setting up aliases in `.bashrc` for commonly used commands
+   - Configure syntax highlighting preferences in the IDE
+   - Set up custom key bindings if needed
+
+2. **Version Management:**
+   - Look into using virtual environments (`venv`) for project isolation
+   - Consider upgrading to a newer Python version if projects allow it
+   - Document project-specific Python requirements
+
+3. **AWS Integration:**
+   - Explore more AWS Toolkit features for Lambda development
+   - Set up CloudFormation templates for infrastructure as code
+   - Integrate with other AWS services like S3, DynamoDB, etc.
+
+4. **Team Collaboration:**
+   - Share this workflow documentation with team members
+   - Set up environment sharing for pair programming sessions
+   - Establish coding standards for Python projects in Cloud9
+
+---
+
